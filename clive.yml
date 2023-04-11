@@ -1,0 +1,110 @@
+# documentation: https://github.com/koki-develop/clive#settings
+settings:
+  loginCommand: ["zsh", "--login"]
+  fontSize: 26
+  defaultSpeed: 20
+
+# documentation: https://github.com/koki-develop/clive#actions
+actions:
+  - pause
+  - type: "# APK パッケージに署名するための証明書を生成"
+  - key: enter
+  - type: docker run --rm -v "${PWD}":/work cgr.dev/chainguard/melange keygen
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# melange のコンテナを起動して shell を奪う"
+  - key: enter
+  - type: docker run --rm --privileged -it -v "${PWD}":/work --entrypoint ash cgr.dev/chainguard/melange
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# hello-server の APK パッケージをビルド"
+  - key: enter
+  - type: melange build melange.yaml --signing-key melange.rsa --arch aarch64
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# 生成された hello-server の APK パッケージを表示"
+  - key: enter
+  - type: ls -la packages/aarch64/
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# hello-server の APK パッケージをインストールして動作確認"
+  - key: enter
+  - type: apk add ./packages/aarch64/hello-server-*.apk --allow-untrusted --force-broken-world
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# hello-server のプロセスをバックグラウンドで起動"
+  - key: enter
+  - type: "hello-server > /dev/null 2>&1 &"
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# wget で hello-server にリクエストを投げてみる"
+  - key: enter
+  - type: "wget -qO- http://localhost:8080"
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# hello-server のプロセスを停止"
+  - key: enter
+  - type: pkill hello-server
+  - key: enter
+  - pause
+  - ctrl: l
+  - pause
+  - type: "# hello-server の APK パッケージをアンインストール"
+  - key: enter
+  - type: apk del hello-server --force-broken-world
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: exit
+  - key: enter
+  - ctrl: l
+  - ctrl: l
+  - pause
+  - type: "# hello-server のコンテナイメージをビルド"
+  - key: enter
+  - type: docker run --rm -v "${PWD}":/work cgr.dev/chainguard/apko build apko.yaml hello-server:0.1.0 hello-server.tar -k melange.rsa.pub
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# 生成されたコンテナイメージの tarball を表示"
+  - key: enter
+  - type: ls -la hello-server.tar
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# Docker デーモンにコンテナイメージの tarball を読み込み"
+  - key: enter
+  - type: "ARCH_REF=\"$(docker load < hello-server.tar | grep \"Loaded image\" | sed 's/^Loaded image: //' | head -1)\""
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# 読み込んだコンテナイメージを表示"
+  - key: enter
+  - type: docker images | grep hello-server
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# hello-server のコンテナを起動してみる"
+  - key: enter
+  - type: docker run --name hello-server -d -p 8080:8080 "${ARCH_REF}"
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# curl で hello-server にリクエストを投げてみる"
+  - key: enter
+  - type: "curl -w '\\n' http://localhost:8080"
+  - key: enter
+  - pause
+  - ctrl: l
+  - type: "# hello-server のコンテナを停止と削除"
+  - key: enter
+  - type: "docker stop hello-server && docker rm hello-server"
+  - key: enter
+  - pause

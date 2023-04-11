@@ -1,0 +1,17 @@
+package:
+  name: hello-server
+  version: 0.1.0
+  epoch: 0
+  description: friendly little webserver
+environment:
+  contents:
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    repositories:
+      - https://packages.wolfi.dev/os
+pipeline:
+  - uses: go/build
+    with:
+      modroot: .
+      packages: ./main.go
+      output: hello-server
